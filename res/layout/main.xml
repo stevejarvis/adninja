@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background"
+    android:id="@+id/root_layout"
+    >
+<TextView 
+	android:id="@+id/status"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentBottom="true"
+    android:gravity="center"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    android:background="#77333333"
+    />
+<ImageView 
+	android:id="@+id/ninjaAllow"
+	android:layout_height="400dp"
+	android:layout_width="400dp"
+	android:src="@drawable/ninja_allow"
+	android:layout_centerHorizontal="true"
+	android:layout_centerVertical="true"
+	/>
+<ImageView 
+	android:id="@+id/ninjaBlock"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:src="@drawable/ninja_block"
+	android:visibility="gone"
+	android:layout_centerHorizontal="true"
+	android:layout_centerVertical="true"
+	/>
+</RelativeLayout>

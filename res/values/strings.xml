@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, AdNinjaActivity!</string>
+    <string name="app_name">Ad Ninja</string>
+    <string name="intro_allow">In his calm stance the Ninja will politely bow as ads 
+    pass by. He needs a poke of approval from you to unleash his fury on those pesky 
+    popups.</string>
+    <string name="intro_block">Hiya! The Ninja stance. He will show no mercy unless you ask him to 
+    stop the onslaught.</string>
+    <string name="disclaimer">The Ad Ninja is a valiant warrior and will fight hard for you.\n\n
+    By continuing with this app you confirm you understand the risks related with root access 
+    and promise to not hold the developer accountable if something unexpected 
+    happens.</string>
+    
+    <!-- License checking status messages -->
+    <string name="checking_license">Checking license...</string>
+    <string name="dont_allow">Invalid License.</string>
+    <string name="application_error">Application error: %1$s</string>
+
+    <!-- Unlicensed dialog messages -->
+    <string name="unlicensed_dialog_title">Application not licensed</string>
+    <string name="unlicensed_dialog_body">This application is not licensed or there are network problems. Please purchase it from Android Market.
+    \n\nIf you have purchased it, note that the first run requires an internet connection for verification. Close the app and try again.</string>
+    <string name="buy_button">Buy app</string>
+    <string name="quit_button">Exit</string>
+    <string name="blocking">Beginning Blocking...</string>
+    <string name="unblocking">Unblocking...</string>
+    <string name="working">Changing Ninja status...</string>
+    <string name="su_denied_title">Root Denied</string>
+    <string name="su_denied_message">The root application was not found. Please check that the device
+    is properly rooted!</string>
+    <string name="ok">Ok</string>
+    <string name="blocking_active">Ads ninja\'d. Tap to tame.</string>
+    <string name="blocking_inactive">Ads allowed. Tap to release his fury.</string>
+	<string name="thread_fail_title">Problem</string>
+	<string name="thread_fail_msg">Something went wrong. Check that the SD Card is mounted
+	and available and that the device has root access!</string>
+</resources>
