@@ -1,25 +1,45 @@
 /*
+ * GNU GENERAL PUBLIC LICENSE
+ *
+ * Ad Ninja is an Android application intended to block popup ads.
+ * Copyright (C) 2014 Steve Jarvis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
  * Ad Ninja. This app includes 2 hosts files in the assets folder. One is the standard
  * hosts file, the other includes redirects to localhost for all known ad providers.
  * Each click toggles on/off and copies the appropriate file to /system/etc/hosts.
- * 
+ *
  * Update for 1.1
  * -Add App Licensing & Allows App to SD
  * -New Ninja
- * 
+ *
  * Update for 1.2
  * - Added something I can't remember to the hosts file
  * - Fixed bug so that hosts file updates when it should
- * 
+ *
  * Update for 1.3
  * - Stored preference so license isn't checked for after it's confirmed
- * 
+ *
  * Update 1.4
  * - Changed story so button stays at bottom
  * - Allow landscape
  * - Threaded everything. Plus copy files EVERY time. Seems more robust and doesn't
  * 	take long
- * 
+ *
  * Update 1.5
  * - Bug fix. Crash when su denied from thread.
  */
@@ -70,12 +90,12 @@ import com.flurry.android.FlurryAgent;
 public class AdNinjaActivity extends Activity{
 	//Tag
 	private final String TAG = "ninja";
-	
+
 	//So we can reference the task
 	private HiyaTask hiyaTask = null;
-	
+
 	//Key for license checking.
-	private static final String BASE64_PUBLIC_KEY = 
+	private static final String BASE64_PUBLIC_KEY =
 		"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxNkSAz" +
 		"dqQVaLYOFmueXHEQzRgiX4hbqCFOdf3WpKyVmzffNz7ZkgMXqB1" +
 		"VtANt/jpt7JxvgIGtXCE9pP1W0O3rTYEYOjdiTi36n+ULUVg8jw" +
@@ -85,15 +105,15 @@ public class AdNinjaActivity extends Activity{
 		"3JY7SVQw3cruQZuGNNEmWGeuzR00gmQ2C9yfQ4xlvWy3/MoAgbjbcd" +
 		"cH/M/9yKtu9qzxfP2irQIDAQAB";
 	private static final byte[] SALT = new byte[] {
-        46,-65,50,-118,-23,-53,34,-69,53,83,95,-45,-77,-113, 
+        46,-65,50,-118,-23,-53,34,-69,53,83,95,-45,-77,-113,
         46,-93,-91,12,-50,39
     };
 	private LicenseCheckerCallback mLicenseCheckerCallback;
     private LicenseChecker mChecker;
-    
+
     // A handler on the UI thread.
     private Handler mHandler;
-    
+
 	//The hosts files and sd location.
 	private static final File SD_DIR = new File(Environment.
 			getExternalStorageDirectory().toString()+File.separator+".AdNinja");
@@ -101,30 +121,30 @@ public class AdNinjaActivity extends Activity{
 			"hosts_allow");
 	private static final File FILE_BLOCK = new File(SD_DIR,File.separator+
 			"hosts_block");
-	
+
 	//Preference class instance. Static so it can be referenced from the static
 	//task class. Static is good because there's only one instance of this.
 	private static Prefs prefs;
-	
+
 	//Incrementing the version copies new hosts files.
 	private static final int VERSION = 2;
-	
+
 	//Current blocking status.
 	private TextView status;
-	
+
 	//The big bad ninja and his animation.
 	private ImageView ninjaAllow, ninjaBlock;
 	private ScaleAnimation pulse;
-	
-    /** 
-     * Called when the activity is first created. 
+
+    /**
+     * Called when the activity is first created.
      * */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.main);
-        
+
 		//Declare the widgets
         status = (TextView) findViewById(R.id.status);
         ninjaAllow = (ImageView) findViewById(R.id.ninjaAllow);
@@ -133,10 +153,10 @@ public class AdNinjaActivity extends Activity{
         prefs = new Prefs(this);
         //Create animation
         anim();
-        
+
         //Set pic and status text right.
         updateStatus("null");
-		
+
         //If it's an update and only on update, automatically set the files.
         if(prefs.isUpdate(VERSION) && !prefs.isFirstRun()){
         	if(prefs.isBlock()){
@@ -148,13 +168,13 @@ public class AdNinjaActivity extends Activity{
     		}
         }
         prefs.setRunned(VERSION);
-	    
+
         //Launch welcome ON FIRST RUN.
   		if(prefs.isFirstRun()){
   			startActivity(new Intent(this, Intro.class));
   			prefs.setFirstRun();
   		}
-        
+
         /*
          * Reattach the thread
          */
@@ -162,7 +182,7 @@ public class AdNinjaActivity extends Activity{
         if(hiyaTask != null && hiyaTask.stillGoing){
         	hiyaTask.attach(this);
         }
-        
+
 	    //Set onclicklisteners
         ninjaAllow.setOnClickListener(new View.OnClickListener(){
 			@Override
@@ -178,55 +198,55 @@ public class AdNinjaActivity extends Activity{
 				hiyaTask.execute(FILE_ALLOW);
 			}
         });
-        
+
         /*Check licensing iff the license has not already been verified. This
          * is safe because if the app is uninstalled the prefs will be as well.
          */
-        if(!prefs.licenseIsConfirmed()){  
+        if(!prefs.licenseIsConfirmed()){
 	        //TODO uncomment for Market releases
         	//checkLicense();
         }
-    } 
-    
+    }
+
     //Start Flurry
     public void onStart(){
     	super.onStart();
     	FlurryAgent.onStartSession(this, "2HVAGQXAU6PYBA3AJYDL");
     	FlurryAgent.onPageView();
     }
-    
+
     //Stop Flurry
     public void onStop(){
        super.onStop();
        FlurryAgent.onEndSession(this);
     }
-    
+
     //Destroy activity
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mChecker != null) mChecker.onDestroy();
-        
+
         //Attempt to prevent out of memory errors. Unbind layout so it can
         //be garbage collected.
         unbindDrawables(findViewById(R.id.root_layout));
         System.gc();
     }
-    
+
     //Save the instance on orientation change
     @Override
 	public Object onRetainNonConfigurationInstance() {
 		if(hiyaTask != null) hiyaTask.detach();
 		return(hiyaTask);
 	}
-    
+
     //Unbind the drawables.
     public void unbindDrawables(View view){
     	if (view.getBackground() != null) {
             view.getBackground().setCallback(null);
         }
     }
-    
+
     //Detect menu button
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -245,18 +265,18 @@ public class AdNinjaActivity extends Activity{
     	}
     	return false;
     }
-    
+
     //Simple pulsing animation
     public void anim(){
     	float small = 0.9f;
     	float large = 1.16f;
-    	pulse = new ScaleAnimation (large, small, large, small, Animation.RELATIVE_TO_SELF, 
+    	pulse = new ScaleAnimation (large, small, large, small, Animation.RELATIVE_TO_SELF,
 				0.6f, Animation.RELATIVE_TO_SELF, 0.5f);
     	pulse.setRepeatMode(Animation.REVERSE);
     	pulse.setRepeatCount(Animation.INFINITE);
     	pulse.setDuration(1500);
     }
-	
+
 	//Check license
 	public void checkLicense(){
 		/*
@@ -275,10 +295,10 @@ public class AdNinjaActivity extends Activity{
             this, new ServerManagedPolicy(this,
                 new AESObfuscator(SALT, getPackageName(), deviceId)),
             BASE64_PUBLIC_KEY);
-        
+
         doCheck();
 	}
-	
+
     //Make a toast noti. Just pass the message.
 	public void toast(String msg){
 		Context context = getApplicationContext();
@@ -286,7 +306,7 @@ public class AdNinjaActivity extends Activity{
 		Toast toast = Toast.makeText(context, msg, duration);
 		toast.show();
 	}
-	
+
 	//If pass "null", change the status text and image to whatever is in the prefs.
 	//Else the licensing failed, we're turning their shat off and status = "Invalid License"
 	public void updateStatus(String update){
@@ -307,12 +327,12 @@ public class AdNinjaActivity extends Activity{
 			status.setText(update);
             ninjaAllow.setEnabled(false);
             ninjaBlock.setEnabled(false);
-            
+
             //Not checking whether it succeeds, but don't think it matters really.
             //Even if it doesn't do the best to cut their shat off.
             hiyaTask = new HiyaTask(this);
             hiyaTask.execute(FILE_ALLOW);
-			
+
             prefs.setBlock(false);
 			ninjaBlock.clearAnimation();
 			ninjaBlock.setVisibility(View.GONE);
@@ -320,17 +340,17 @@ public class AdNinjaActivity extends Activity{
 			FlurryAgent.onEvent("Invalid license: Turned blocking OFF");
 		}
 	}
-	
+
 	/*
 	 * License checking methods. It's checked against the Market for a valid license.
-	 * During the check buttons are disabled. If it passes everything is enabled and 
+	 * During the check buttons are disabled. If it passes everything is enabled and
 	 * use continues as normal. If check fails status is set to "Invalid License" and
 	 * the user is prompted to exit or buy app and buttons remain disabled.
 	 */
 	protected Dialog onCreateDialog(int id) {
         //Declare dialog
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				
+
 		switch(id){
         case 0:	//License failure
         	Log.w(TAG,"License failure dialog");
@@ -351,7 +371,7 @@ public class AdNinjaActivity extends Activity{
 	            }).
 	            create();
         	break;
-        	
+
         case 1:	//su denied
         	Log.w(TAG,"Su denied failure");
         	builder
@@ -364,7 +384,7 @@ public class AdNinjaActivity extends Activity{
 	            }).
 	            create();
         	break;
-        	
+
         case 2:	//Thread failed
         	Log.w(TAG,"Thread returned false");
         	builder
@@ -378,7 +398,7 @@ public class AdNinjaActivity extends Activity{
 	            create();
         	break;
         }
-		
+
 		AlertDialog dialog = builder.create();
 		return dialog;
     }
@@ -406,7 +426,7 @@ public class AdNinjaActivity extends Activity{
                     prefs.licenseConfirmed(true);	//License has been confirmed, don't check again
             	}else{	//License fail
 	                updateStatus(result);
-            	} 
+            	}
             }
         });
     }
@@ -442,7 +462,7 @@ public class AdNinjaActivity extends Activity{
             displayResult(result);
         }
     }
-    
+
     /*
      * Thread the I/O
      */
@@ -452,37 +472,37 @@ public class AdNinjaActivity extends Activity{
     	private String loading_status = "Loading Ninja Intel...";
     	private String executing_status = "Executing Mission...";
     	private String status = loading_status;
-    	
+
     	//Make a progress dialog
   		private ProgressDialog dialog;
-  		
+
   		//Cause we need to know if the task is still rockin
   		private boolean stillGoing = true;
-    	
+
   		//Constructor
     	public HiyaTask(AdNinjaActivity act){
     		activity = act;
     		dialog = new ProgressDialog(activity);
     	}
-    	
+
     	@Override
   		protected void onPreExecute(){
   			this.dialog.setMessage(status);
   			this.dialog.setCancelable(false);
   			this.dialog.show();
   		}
-    	
+
     	//Update the dialog
 		@Override
 		protected void onProgressUpdate(String... msg) {
         	dialog.setMessage(msg[0]);
 	    }
-    	
+
 		@Override
 		protected Boolean doInBackground(File... file) {
 			//Marks whether this method is successfully executed
 	    	boolean success = false;
-	    	
+
 	    	//I made preferences to only copy files when necessary,
 	    	//but changed my mind. They'll be copied everytime. It runs
 	    	//in the background, so nbd. And if they delete the folder
@@ -495,11 +515,11 @@ public class AdNinjaActivity extends Activity{
 	        	Log.e("ninja","Error copying assets");
 	        	return false;
 	        }
-	    	
+
 	        //Change status
 	        status = executing_status;
 	        publishProgress(status);
-	        
+
 	    	//For root access
 	    	Process process = null;
 	    	BufferedReader cmdIn;
@@ -507,13 +527,13 @@ public class AdNinjaActivity extends Activity{
 	        //Get ROOT access.
 	        try {
 				process = Runtime.getRuntime().exec("su");
-				
+
 				//Stream writer
 				cmdOut = new DataOutputStream(process.getOutputStream());
 				cmdIn = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			} catch (IOException e1) {
 				FlurryAgent.onError("4","su denied","Fail");
-				
+
 				return success;	//False, fail.
 			}
 			try{
@@ -548,8 +568,8 @@ public class AdNinjaActivity extends Activity{
 			}
 			try {
 				process.waitFor();
-				if (process.exitValue() == 0) { 
-		            success = true; 
+				if (process.exitValue() == 0) {
+		            success = true;
 				}else{
 					FlurryAgent.onError("7", "Bad exit value: "+process.exitValue(), "Fail");
 				}
@@ -557,17 +577,17 @@ public class AdNinjaActivity extends Activity{
 				FlurryAgent.onError("8", "waitFor() failed", "Warning");
 				e.printStackTrace();
 			}
-			
+
 			return success;
 		}
-		
+
 		//Passed success from do in background
 		@Override
 		protected void onPostExecute(Boolean result){
 			this.dialog.dismiss();
 			//Marks whether it needs to be reattached
 			this.stillGoing = false;
-			
+
 			//Update the UI
 			if(result){
 				prefs.setBlock(!prefs.isBlock());	//Toggle
@@ -580,30 +600,30 @@ public class AdNinjaActivity extends Activity{
 				activity.showDialog(2);
 				FlurryAgent.onError("1", "hiya returned false", "Fail");
 			}
-			
+
 			//Remove the context reference. Causes out of memory errors.
 			activity.hiyaTask = null;
 			activity = null;
 		}
-		
+
 		//Attach
 		public void attach(AdNinjaActivity act){
 			activity = act;
-			
+
 			//Take care of the dialog
 			this.dialog.setMessage(status);
   			this.dialog.setCancelable(false);
   			this.dialog.show();
 		}
-		
+
 		//Detach
 		public void detach(){
 			activity = null;
-			
+
 			//Dismiss dialog
 			this.dialog.dismiss();
 		}
-		
+
 		//Create the new files.
 	    public void createFiles(){
 	        SD_DIR.mkdirs();
@@ -614,9 +634,9 @@ public class AdNinjaActivity extends Activity{
 				FlurryAgent.onError("2", "IOException creating new files", "Fail");
 			}
 	    }
-		
+
 		/* Copy the hosts_allow and hosts_block to sd card. Runs first time or
-		 * on update. On update files will be overwritten automatically. After this 
+		 * on update. On update files will be overwritten automatically. After this
 		 * runs hosts_block and hosts_allow will be in (external)/.AdNinja/
 		 */
 		public void copyAssets() throws IOException{
@@ -629,7 +649,7 @@ public class AdNinjaActivity extends Activity{
 		    OutputStream outAllow = new FileOutputStream(FILE_ALLOW);
 		    copyFile(inBlock, outBlock);
 		    copyFile(inAllow, outAllow);
-		    
+
 		    //Close toys
 		    inAllow.close();
 		    inBlock.close();
@@ -638,7 +658,7 @@ public class AdNinjaActivity extends Activity{
 			outAllow.close();
 			outBlock.close();
 		}
-		
+
 		//Pass streams in, out
 	    public void copyFile(InputStream in, OutputStream fOut) throws IOException {
 	    	//transfer bytes from the in to the out
@@ -647,8 +667,8 @@ public class AdNinjaActivity extends Activity{
 	    	while ((length = in.read(buffer))>0){
 	    		fOut.write(buffer, 0, length);
 	    	}
-	    }    	
-		
+	    }
+
 		//Using Android (not Busybox) commands finds the file system type for mounting and the mount directory.
 		//Sets the values in preferences. Should run on install and update.
 		public boolean getFileSystem(DataOutputStream cmdOut, BufferedReader cmdIn) throws IOException{
@@ -676,11 +696,11 @@ public class AdNinjaActivity extends Activity{
 			else if(response.contains(" rfs ")){
 				prefs.setType("rfs");
 			}
-			
+
 			//And the mount point. It seems to be the first listed in "mount"
 			String mounts[] = response.split(" ");	//Split on space.
 			prefs.setMount(mounts[0]);	//We want the first column.
-			
+
 			return true;	//On success
 		}
     }
