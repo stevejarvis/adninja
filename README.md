@@ -16,9 +16,9 @@ Google Play Store for about three years. It could use some refreshing, and help
 is very appreciated. Please fork and pull request away!
 
 Ad Ninja is a paid application, but I would much rather see it evolve and update
-than continue charging for installs. If this project gains traction here I will
+than making a dollar from installs. If this project gains traction here I will
 happily either a) change it to a free install or b) share income with
-contributors.
+contributors or c) donate proceeds to something worthwhile.
 
-[Check it out in the Play Store!]
+[Check it out in the Play Store]
 (https://play.google.com/store/apps/details?id=com.sajarvis.adninja)
